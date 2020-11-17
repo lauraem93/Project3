@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 #Code needed to change to readme.md:
 
-#render("Project-2-Automation.md", output_file = "README.md")
+#render("Project3-ReadMe.md", output_file = "README.md")
 ```
 
 # Packages to load

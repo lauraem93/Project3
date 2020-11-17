@@ -1,0 +1,85 @@
+stageId,stageNum,year,departure_city,arrival_city,classification,distance
+sr:stage:537026,1,2020,Nice,Nice,Flat,156
+sr:stage:537028,2,2020,Nice,Nice,Medium Mountain,187
+sr:stage:537030,3,2020,Nice,Sisteron,Flat,198
+sr:stage:537032,4,2020,Sisteron,Orcieres,Medium Mountain,160
+sr:stage:537034,5,2020,Gap,Privas,Flat,183
+sr:stage:537036,6,2020,Le Teil,Mont Aigoual,Medium Mountain,191
+sr:stage:537038,7,2020,Millau,Lavaur,Flat,168
+sr:stage:537040,8,2020,Cazeres,Loudenvielle,High Mountain,141
+sr:stage:537042,9,2020,Pau,Laruns,High Mountain,153
+sr:stage:537044,10,2020,Oleron,Ile de Re Saint-Martin-de-Re,Flat,169
+sr:stage:537046,11,2020,Chatelaillon-Plage,Poitiers,Flat,167
+sr:stage:537048,12,2020,Chauvigny,Sarran,Medium Mountain,218
+sr:stage:537050,13,2020,Chatel-Guyon,Puy Mary,High Mountain,191
+sr:stage:537052,14,2020,Clermont-Ferrand,Lyon,Flat,194
+sr:stage:537054,15,2020,Lyon,Grand Colombier,High Mountain,175
+sr:stage:537056,16,2020,La Tour-du-Pin,Villard de Lans,High Mountain,164
+sr:stage:537058,17,2020,Grenoble,Meribel,High Mountain,170
+sr:stage:537060,18,2020,Meribel,La Roche-sur-Foron,High Mountain,175
+sr:stage:537062,19,2020,Bourg-En-Bresse,Champagnole,Flat,166.5
+sr:stage:537064,20,2020,Lure,La planche des belles filles,Individual Time Trial,36.2
+sr:stage:537066,21,2020,Mantes-la-Jolie,Paris,Flat,122
+sr:stage:415976,1,2019,Brussels,Brussels,Flat,194.5
+sr:stage:415978,2,2019,Brussels,Brussels,Team Time Trial,27.6
+sr:stage:415980,3,2019,Binche,Epernay,Medium Mountain,215
+sr:stage:415982,4,2019,Reims,Nancy,Flat,213.5
+sr:stage:415984,5,2019,Saint-Die-Des-Vosges,Colmar,Medium Mountain,175.5
+sr:stage:415986,6,2019,Mulhouse,Plancher-Les-Mines,High Mountain,160.5
+sr:stage:415988,7,2019,Belfort,Chalon-sur-Saone,Flat,230
+sr:stage:415990,8,2019,Macon,Saint Etienne,Medium Mountain,200
+sr:stage:415992,9,2019,Saint Etienne,Brioude,Medium Mountain,170.5
+sr:stage:415994,10,2019,Saint-Flour,Albi,Flat,217.5
+sr:stage:415996,11,2019,Albi,Toulouse,Flat,167
+sr:stage:415998,12,2019,Toulouse,Bagneres-de-Bigorre,High Mountain,209.5
+sr:stage:416000,13,2019,Pau,Pau,Individual Time Trial,27.2
+sr:stage:416002,14,2019,Tarbes,Bareges,High Mountain,117.5
+sr:stage:416004,15,2019,Limoux,Foix,High Mountain,185
+sr:stage:416006,16,2019,Nimes,Nimes,Flat,177
+sr:stage:416008,17,2019,Vers-Pont-Du-Gard,Gap,Medium Mountain,200
+sr:stage:416010,18,2019,Embrun,Valloire,High Mountain,208
+sr:stage:416012,19,2019,Saint-Jean-De-Maurienne,Tignes,High Mountain,89
+sr:stage:416014,20,2019,Albertville,Val Thorens,High Mountain,59.5
+sr:stage:416016,21,2019,Rambouillet,Paris,Flat,128
+sr:stage:342563,1,2018,Noirmoutier-en-l ile,Fontenay-le-Comte,Flat,201
+sr:stage:342565,2,2018,Mouilleron-Saint-Germain,La Roche-Sur-Yon,Flat,182.5
+sr:stage:342567,3,2018,Cholet,Cholet,Team Time Trial,35.5
+sr:stage:342569,4,2018,La Baule,Sarzeau,Flat,195
+sr:stage:342571,5,2018,Lorient,Quimper,Medium Mountain,204.5
+sr:stage:342573,6,2018,Brest,Mur-de-Bretagne,Medium Mountain,181
+sr:stage:342575,7,2018,Fougeres,Chartres,Flat,231
+sr:stage:342577,8,2018,Dreux,Amiens,Flat,181
+sr:stage:342579,9,2018,Arras,Roubaix,Medium Mountain,156.5
+sr:stage:342581,10,2018,Annecy,Le Grand-Bornand,High Mountain,158.5
+sr:stage:342583,11,2018,Albertville,La Rosiere Espace San Bernardo,High Mountain,108.5
+sr:stage:342585,12,2018,Bourg-Saint-Maurice,Alpe d'Huez,High Mountain,175.5
+sr:stage:342587,13,2018,Bourg d'Oisans,Valence,Flat,169.5
+sr:stage:342589,14,2018,Saint-Paul-Trois-Chateaux,Mende,Medium Mountain,188
+sr:stage:342591,15,2018,Millau,Carcassonne,Medium Mountain,181.5
+sr:stage:342593,16,2018,Carcassonne,Bagneres-de-Luchon,High Mountain,218
+sr:stage:342595,17,2018,Bagneres-de-Luchon,Saint-Lary-Soulan,High Mountain,65
+sr:stage:342597,18,2018,Trie-sur-Baise,Pau,Flat,171
+sr:stage:342599,19,2018,Lourdes,Laruns,High Mountain,200.5
+sr:stage:342601,20,2018,Saint-Pee-sur-Nivelle,Espelette,Individual Time Trial,31
+sr:stage:342603,21,2018,Paris,Paris,Flat,116
+sr:stage:271588,1,2017,Dusseldorf,Dusseldorf,Individual Time Trial,14
+sr:stage:271590,2,2017,Dusseldorf,Liege,Flat,203.5
+sr:stage:271592,3,2017,Verviers,Longwy,Medium Mountain,212.5
+sr:stage:271594,4,2017,Mondorf-les-Bains,Vittel,Flat,207.5
+sr:stage:271596,5,2017,Vittel,La planche des belles filles,Medium Mountain,160.5
+sr:stage:271598,6,2017,Vesoul,Troyes,Flat,216
+sr:stage:271600,7,2017,Troyes,Nuits-Saint-Georges,Flat,213.5
+sr:stage:271602,8,2017,Dole,Station des rousses,Medium Mountain,187.5
+sr:stage:271604,9,2017,Nantua,Chambery,High Mountain,181.5
+sr:stage:271606,10,2017,Perigueux,Bergerac,Flat,178
+sr:stage:271608,11,2017,Eymet,Pau,Flat,203.5
+sr:stage:271610,12,2017,Pau,Peyragudes,High Mountain,214.5
+sr:stage:271612,13,2017,Saint-Girons,Foix,High Mountain,101
+sr:stage:271614,14,2017,Blagnac,Rodez,Medium Mountain,181.5
+sr:stage:271616,15,2017,Laissac-Severac l'Eglise,Le Puy-en-Velay,Medium Mountain,189.5
+sr:stage:271618,16,2017,Le Puy-en-Velay,Romans-sur-Isere,Flat,165
+sr:stage:271620,17,2017,La Mure,Serre-Chevalier,High Mountain,183
+sr:stage:271622,18,2017,Briancon,Col d Izoard,High Mountain,179.5
+sr:stage:271624,19,2017,Embrun,Salon-de-Provence,Flat,222.5
+sr:stage:271626,20,2017,Marseille,Marseille,Individual Time Trial,22.5
+sr:stage:271628,21,2017,Montgeron,Paris,Flat,103
