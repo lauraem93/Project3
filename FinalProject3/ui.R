@@ -19,6 +19,9 @@ library(knitr)
 library(shiny)
 library(shinydashboard)
 library(ggplot2)
+library(rmarkdown)
+library(plotly)
+library(dendextend)
 
 # Read in data
 
@@ -384,32 +387,37 @@ dashboardPage(
                     titlePanel("Unsupervised Learning - Clustering"),
                     sidebarLayout(
                         sidebarPanel(
-                            h3("Stage Results Data"),
-                            checkboxGroupInput(
-                                inputId = "clustStageVar",
-                                label = "Variable Selection",
-                                choices = c("result.time_ranking", "name", "country_code", "result.sprint", "result.sprint_ranking", "result.climber", "result.climber_ranking", "classification", "distance", "past.ranking_avg")
+                            h3("Data Set to Use"),
+                            selectInput(
+                                inputId = "dataSelect",
+                                label = "Data",
+                                choices = c("Stage Results" = "Results", "Winner's Time" = "Time"),
+                                selected = "Stage Results"
+                            ),
+                            conditionalPanel(
+                                condition = "input.dataSelect == 'Results'",
+                                checkboxGroupInput(
+                                    inputId = "clustStageVar",
+                                    label = "Variable Selection",
+                                    choices = c("result.time_ranking", "name", "country_code", "result.sprint", "result.sprint_ranking", "result.climber", "result.climber_ranking", "classification", "distance", "past.ranking_avg")
+                                )
+                            ),
+                            conditionalPanel(
+                                condition = "input.dataSelect == 'Time'",
+                                checkboxGroupInput(
+                                    inputId = "clustTimeVar",
+                                    label = "Variable Selection",
+                                    choices = c("time", "stageNum", "year", "departure_city", "arrival_city", "classification", "distance")
+                                )
                             ),
                             actionButton(
                                 inputId = "submit6",
                                 label = "Submit"
-                            ),
-                            h3("Finish Time Data"),
-                            checkboxGroupInput(
-                                inputId = "clustTimeVar",
-                                label = "Variable Selection",
-                                choices = c("time", "stageNum", "year", "departure_city", "arrival_city", "classification", "distance")
-                            ),
-                            actionButton(
-                                inputId = "submit7",
-                                label = "Submit"
                             )
                         ),
                         mainPanel(
-                            h3("Stage Results Hierarchical Cluster"),
-                            plotOutput("clusterPlot1"),
-                            h3("Winner's Time Hierarchical Cluster"),
-                            plotOutput("clusterPlot2")
+                            uiOutput("clusterTitle"),
+                            plotOutput("clusterPlot")
                         )
                     )
                 )

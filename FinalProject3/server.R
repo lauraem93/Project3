@@ -19,6 +19,9 @@ library(knitr)
 library(shiny)
 library(shinydashboard)
 library(ggplot2)
+library(rmarkdown)
+library(plotly)
+library(dendextend)
 
 # Read in data
 
@@ -426,40 +429,43 @@ shinyServer(function(input, output) {
     
     # Unsupervised Learning - Clustering
     
-    # Clustering for Stage Results
+    #Clusterint Title
     
-    cluster1 <- eventReactive(input$submit6, {
-        clusterVar1 <- input$clustStageVar
+    clusterName <- eventReactive(input$submit6, {
         
-        #Select Variables for cluster
-        clustData <- left_join(results, stageData, by = "stageId") %>% select(all_of(clusterVar1)) %>% na.omit()
-        
-        #Run Hierarchical Cluster
-        hierClust1 <- hclust(dist(clustData))
-        plot(hierClust1)
     })
     
-    output$clusterPlot1 <- renderPlot({
-        #Plot Hierarchical cluster
-        cluster1()
+    output$clusterTitle <- renderUI({
+        if (input$dataSelect == "Results") {
+            title <- "Stage Results Hierarchical Cluster Dendrogram"
+        } else if (input$dataSelect == "Time") {
+            title <- "Winner's Time Hierarchical Cluster Dendrogram"
+        }
+        h3(title)
     })
     
-    cluster2 <- eventReactive(input$submit7, {
-        clusterVar2 <- input$clustTimeVar
-        clustData2 <- finishTime
-        clustData2$time <- as.numeric(clustData2$time)
+    cluster <- eventReactive(input$submit6, {
+        #Choose correct data type and variables
+        dataType <- input$dataSelect
+        if (dataType == "Stage Results"){
+            clusterVar <- input$clustStageVar
+            clusterData <- left_join(results, stageData, by = "stageId") %>% select(all_of(clusterVar)) %>% na.omit()
+        } else if (dataType == "Winner's Time"){
+            clusterVar <- input$clustTimeVar
+            clustData <- finishTime
+            clustData$time <- as.numeric(clustData$time)
+            clustData <- clustData %>% select(all_of(clusterVar))
+        }
         
-        #Select variables for cluster
-        clustData2 <- clustData2 %>% select(all_of(clusterVar2))
-        
-        #Run Hierarchical Cluster
-        hierClust2 <- hclust(dist(clustData))
-        plot(hierClust2)
+        #Do hierarchical clustering
+        hierClust <- hclust(dist(clustData))
+        plot(hierClust)
     })
     
-    output$clusterPlot2 <- renderPlot({
-        #Plot Hierarchical cluster
-        cluster2()
+    #Plot dendrogram
+    
+    output$clusterPlot <- renderPlot({
+        cluster()
     })
     
 })
