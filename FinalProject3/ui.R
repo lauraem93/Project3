@@ -64,10 +64,10 @@ dashboardPage(
                     mainPanel(
                         h3("App Information"),
                         br(),
-                        p("The purpose of this app is to explore data collected on the Tour de France stage results over the past four years. To learn more about the Tour de France and other cycling races, visit ", a(href = "cyclingnews.com/races/tour-de-france-2020/", "cyclingnews"), " or the ", a(href = "https://www.letour.fr/en/", "Tour de France website")),
+                        p("The purpose of this app is to explore data collected on the Tour de France stage results over the past four years. To learn more about the Tour de France and other cycling races, visit ", a(href = "https://cyclingnews.com/races/tour-de-france-2020/", "cyclingnews"), " or the ", a(href = "https://www.letour.fr/en/", "Tour de France website")),
                         p("This app contains different pages for exploratory data analysis, modeling, unsupervised learning, and the data set. These pages can be accessed through the tabs on the left."),
                         br(),
-                        h3("Data Information"),
+                        h3("Data Information - Variable Explanation"),
                         br(),
                         p(strong("stageId"), " - id number for the stage"),
                         p(strong("athleteId"), " - cyclist's id number"),
@@ -124,7 +124,7 @@ dashboardPage(
                             ),
                             sliderInput(
                                 inputId = "dataDistance",
-                                label = "Distance Range",
+                                label = "Distance Range - including endpoints",
                                 min = 0,
                                 max = 300,
                                 value = c(0,300)
@@ -138,7 +138,7 @@ dashboardPage(
                             ),
                             textInput(
                                 inputId = "dataName",
-                                label = "Cyclist",
+                                label = "Cyclist - Input Lastname, Firstname",
                                 value = ""
                             ),
                             textInput(
@@ -146,37 +146,45 @@ dashboardPage(
                                 label = "Cyclist Nationality - Input Country Code",
                                 value = ""
                             ),
+                            textInput(
+                                inputId = "dataStageNum",
+                                label = "Stage ID - Input in form sr:stage:number",
+                                value = ""
+                            ),
                             sliderInput(
                                 inputId = "dataSprint",
-                                label = "Sprinter's Jersey Points",
+                                label = "Sprinter's Jersey Points - including endpoints",
                                 min = 0,
                                 max = 70,
                                 value = c(0, 70)
                             ),
                             sliderInput(
                                 inputId = "dataClimber",
-                                label = "Climber's Jersey Points",
+                                label = "Climber's Jersey Points - including endpoints",
                                 min = 0,
                                 max = 70,
                                 value = c(0, 70)
                             ),
                             sliderInput(
                                 inputId = "dataRanking",
-                                label = "Stage Ranking",
+                                label = "Stage Ranking - including endpoints",
                                 min = 0,
                                 max = 180,
                                 value = c(0, 180)
                             )
                         ),
                         mainPanel(
+                            #dataTableOutput("redoResultsData"),
                             h3("Stage Data"),
-                            dataTableOutput("stageTable"),
+                            p("This data set includes information about each stage including stage number, year, arrival and departure cities, distance (in km), stage ID number, and classification. Variables can be selected and the data can be filtered using the selections in the side panel. The data set can be saved using the download button below the table."),
+                            dataTableOutput("redoStageData"),
                             downloadButton(
                                 outputId = "saveStageData",
                                 label = "Save Stage Data"
                             ),
                             h3("Results Data"),
-                            dataTableOutput("resultsTable"),
+                            p("This data set includes information about the athlete results of each stage including athlete name, ID number, and nationality (country_code), points awarded for the sprint and climber jerseys and the stage ranking for these jerseys, and overall time and stage ranking. The time is given with respect to the athlete that finished one place ahead. Variables can be selected and the data can be filtered using the selections in the side panel. The data set can be saved using the download button below the table."),
+                            dataTableOutput("redoResultsData"),
                             downloadButton(
                                 outputId = "saveResultsData",
                                 label = "Save Results Data"
@@ -245,10 +253,13 @@ dashboardPage(
                         ),
                         mainPanel(
                             h3("Stage Wins Table"),
+                            p("The table below shows the cyclist or country with the most stage wins over all four years of the Tour de France (2017-2020). Table options can be selected and submitted in the side panel."),
                             dataTableOutput("stageWinsTable"),
                             h3("Total Points Awarded"),
+                            p("This table displays the most total points awarded over all four years for either the sprinter or climber jersey. Table options can be selected and submitted on the left."),
                             dataTableOutput("mostPointsTab"),
                             h3("Classification by Distance Table"),
+                            p("The table below is a contingency table of stage distance by classification. The distance is split into different ranges. The number of breaks in distance can be changed using the slider in the side panel. The contingency table can also be viewed collectively over all four years or split into four tables by year."),
                             verbatimTextOutput("contingencyTab")
                         )
                     )
@@ -288,6 +299,7 @@ dashboardPage(
                         ),
                         mainPanel(
                             h3("Distance Histogram"),
+                            p("Below is a histogram of stage distance with a density curve. The data in the histogram can be grouped by either ", em("classification"), " or ", em("year."), " Number of bins used to create the histogram can be changed using the slider on the left. The histogram can be saved using the download button below."),
                             plotOutput("plot1"),
                             br(),
                             downloadButton(
@@ -295,6 +307,7 @@ dashboardPage(
                                 label = "Save Histogram"
                             ),
                             h3("Winner's Time by Distance"),
+                            p("Below is a scatterplot of winner's time by distance. The data in the scatter plot can be grouped by either ", em("classification"), " or ", em("year."), " The plot can be saved using the download button below."),
                             plotOutput("plot2"),
                             br(),
                             downloadButton(
@@ -362,7 +375,9 @@ dashboardPage(
                             )
                         ),
                         mainPanel(
-                            h3("Stage Resuts Prediction"),
+                            h3("Stage Results Prediction"),
+                            p("The first model on this page is used to predict the outcome of a stage. Select variables to include in the model and choose the stage on which to make predictions with the selection options in the side panel. The model does take a couple of minutes to run and will not pop up instantaneously. The predictions table contains the predicted and actual finish rankings for each athlete who finished the stage. Fit statistics are also shown to use as a measure of how well the model fits the data and makes predictions."),
+                            uiOutput("math"),
                             dataTableOutput("stageModelTable"),
                             br(),
                             p("The fit statistics for the linear model are shown below:"),
@@ -371,12 +386,13 @@ dashboardPage(
                             verbatimTextOutput("stageModelPredSum"),
                             br(),
                             h3("Winner's Finish Time Prediction"),
+                            p("The second model on this page is either a tree or boosted tree model for the winner's time based on stage variables. Again, variables to use in the model and the stage on which to make predictions can be selected in the side panel on the left. Fit statistics for the model are displayed as a measure of model fit. A table of which variables were used in the model is shown, and a table of actual and predicted finish times is also shown. This model also takes a couple of minutes to run and does not display results instantaneously."),
                             h4("Fit Statistics"),
                             verbatimTextOutput("timeStats"),
                             h4("Selected Prediction Variable Values"),
                             tableOutput("predVar"),
                             h4("Prediction and Actual Times"),
-                            tableOutput("predTable")
+                            tableOutput("predTable"),
                         )
                     ),
                 )
