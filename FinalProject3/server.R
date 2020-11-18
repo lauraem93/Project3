@@ -43,17 +43,15 @@ shinyServer(function(input, output) {
     
     # Data table page
     
-    output$stageTable <- renderDataTable({
+    output$redoStageData <- renderDataTable({
         var <- input$stageCheckbox
-        allVar <- attributes(stageData)$names
+        stageDataSub <- stageData
         
-        #Select columns based on input
-        stageDataSub <- stageData[, allVar, drop = FALSE]
+        stageDataSub <- stageDataSub %>% filter(distance >= input$dataDistance[[1]] & distance <= input$dataDistance[[2]])
         
-        #Filter the data based on input
         if (input$dataYear != "All"){
             stageDataSub <- stageDataSub %>% filter(year == input$dataYear)
-        } 
+        }
         if (input$dataClass != "All"){
             stageDataSub <- stageDataSub %>% filter(classification == input$dataClass)
         }
@@ -64,24 +62,44 @@ shinyServer(function(input, output) {
             stageDataSub <- stageDataSub %>% filter(arrival_city == input$dataArrival)
         }
         
-        stageDataSub <- stageDataSub %>% filter(distance > input$dataDistance[1] & distance < input$dataDistance[2])
         
-        stageDataSub <- stageData[, var, drop = FALSE]
-        
-        stageDataSub
+        stageDataSub <- stageDataSub %>% select(var)
     })
     
     #Download Data Set
     
     output$saveStageData <- downloadHandler(
         filename = "stage-data.csv",
-        content = stageDataSub,
+        content = function(file) {
+            write.csv(stageData1(), file, row.names = FALSE)
+        },
         contentType = "text/csv"
     )
     
     #View Results Data
     
-    output$resultsTable <- renderDataTable({
+    output$redoResultsData <- renderDataTable({
+        var2 <- input$resultsCheckbox
+        resultsDataSub <- results
+        
+        resultsDataSub <- resultsDataSub %>% filter(result.sprint >= input$dataSprint[[1]] & result.sprint <= input$dataSprint[[2]]) %>% filter(result.climber >= input$dataClimber[1] & result.climber <= input$dataClimber[2]) %>% filter(result.time_ranking >= input$dataRanking[1] & result.time_ranking <= input$dataRanking[2])
+        
+        if (input$dataCountry != ""){
+            resultsDataSub <- resultsDataSub %>% filter(country_code == input$dataCountry)
+        }
+        
+        if (input$dataName != ""){
+            resultsDataSub <- resultsDataSub %>% filter(name == input$dataName)
+        }
+        
+        if (input$dataStageNum != ""){
+            resultsDataSub <- resultsDataSub %>% filter(stageId == input$dataStageNum)
+        }
+        
+        resultsDataSub <- resultsDataSub %>% select(var2)
+    })
+    
+    resultsData1 <- reactive({
         var2 <- input$resultsCheckbox
         
         #Filter data based on slider input
@@ -101,12 +119,17 @@ shinyServer(function(input, output) {
         resultsDataSub
     })
     
-    #Need Help With This
+    output$resultsTable <- renderDataTable({
+        resultsData1()
+    })
+    
     #Download Results Data
     
     output$saveResultsData <- downloadHandler(
         filename = "results.csv",
-        content = resultsDataSub,
+        content = function(file) {
+            write.csv(resultsData1(), file, row.names = FALSE)
+        },
         contentType = "text/csv"
     )
     
@@ -115,6 +138,7 @@ shinyServer(function(input, output) {
     submitButton1 <- eventReactive(input$submit1, {
         value <- input$stageWins
         num <- input$printNum1
+        
         if (value == "Cyclist"){
             stageWinsTab <- results %>% group_by(name) %>% filter(result.time_ranking == 1) %>% summarise(totalWins = sum(result.time_ranking)) %>% arrange(desc(totalWins)) %>% head(num)
         } else {
@@ -174,7 +198,7 @@ shinyServer(function(input, output) {
         numBins <- input$bins
     })
     
-    output$plot1 <- renderPlot({
+    hist1 <- reactive({
         g <- ggplot(data = stageData, aes(x = distance))
         
         if (input$split == "No Split"){
@@ -188,13 +212,28 @@ shinyServer(function(input, output) {
         plot1 + labs(x = "Distance", y = "Count", title = "Distance Histogram") + scale_fill_discrete(name = input$split)
     })
     
+    #Output histogram
+    output$plot1 <- renderPlot({
+        print(hist1())
+    })
+    
+    #Download histogram
+    
+    output$saveHist <- downloadHandler(
+        filename = "histogram.png",
+        content = function(file) {
+            ggsave(file, plot = hist1())
+        },
+        contentType = "image/png"
+    )
+    
     # Time by Distance Plot
     
     updateButton2 <- eventReactive(input$update2, {
         type <- input$split2
     })
     
-    output$plot2 <- renderPlot({
+    pointplot <- reactive({
         g <- ggplot(finishTime, aes(x = distance, y = as.numeric(time)))
         
         if (input$split2 == "No Split"){
@@ -208,9 +247,27 @@ shinyServer(function(input, output) {
         plot2 + labs(x = "Distance", y = "Time (min)", title = "Winner's Finish Time by Distance") + scale_colour_discrete(name = input$split2)
     })
     
+    output$plot2 <- renderPlot({
+        print(pointplot())
+    })
+    
+    output$savePlot <- downloadHandler(
+        filename = "timebydistanceplot.png",
+        content = function(file) {
+            ggsave(file, plot = pointplot())
+        },
+        contentType = "image/png"
+    )
+    
     # Supervised Learning Models Page
     
     # Linear Model
+    
+    #MathJax output
+    
+    output$math <- renderUI({
+        withMathJax("The stage outcome model is a linear model of the the form $$ Y = \\mathbf{X} \\beta + E_{ij}$$ where $$ E_{ij} \\sim N(0, \\sigma^2) $$ \\(Y\\) is a vector of observed variables, \\(\\mathbf{X}\\) is the design matrix, \\(\\beta\\) is a vector of linear coefficients, and \\(E_{ij}\\) is a vector of error terms.")
+    })
     
     model1 <- eventReactive(input$submit3, {
         
@@ -250,6 +307,8 @@ shinyServer(function(input, output) {
         trControl <- trainControl(method = "repeatedcv", number = 5, repeats = 3)
         
         lm <- train(result.time_ranking ~ ., data = train1, method = "lm", trControl=trControl)
+        
+        modelObjects <- list(lm = lm, stageModelData = stageModelData)
         
     })
     
@@ -354,9 +413,17 @@ shinyServer(function(input, output) {
     
     #Time prediction model
     
-    model2 <- eventReactive(input$submit4, {
-        #User input predictor var
+    userVar2 <- eventReactive(input$submit4, {
         userVar <- input$timeModelVar
+    })
+    
+    #Create Model - output of this reactive function should be a list of the model, training, and test data sets
+    
+    model2 <- reactive({ 
+        
+        #User input predictor var
+        #userVar <- input$timeModelVar
+        userVar <- userVar2()
         
         #Time needs to be numeric
         finishTime$numTime <- as.numeric(finishTime$time)
@@ -383,29 +450,39 @@ shinyServer(function(input, output) {
             model <- train(numTime ~ ., data = timeTrain, method = "gbm", trControl = trainControl(method = "repeatedcv", number = 10, repeats = 3), verbose = FALSE)
         }
         
-        model
-        
+        modelInfo <- list(model = model, timeTrain = timeTrain, timeTest = timeTest)
+        modelInfo
     })
     
     output$timeStats <- renderPrint({
+        timeTest <- model2()$timeTest
+        
+        predModel <- predict(model2()$model, newdata = timeTest)
+        modelRes <- postResample(predModel, timeTest$numTime)
+        
+        print(modelRes)
+        
+    })
+    
+    #output$timeStats <- renderPrint({
         
         #Fit Statistics
         
-        predModel <- predict(model2(), newdata = timeTest)
-        modelRes <- postResample(predModel, timeTest$numTime)
+    #    predModel <- predict(model2(), newdata = timeTest)
+    #    modelRes <- postResample(predModel, timeTest$numTime)
         
-        modelRes
+    #    modelRes
         
-    })
+    #})
     
     output$predVar <- renderTable({
         stage <- input$timeModelStage
         yearnum <- input$timeModelYear
-        userVar <- input$timeModelVar
+        userVar3 <- userVar2()
         
         predData <- finishTime %>% filter(stageNum == stage & year == yearnum)
         
-        predVar <- predData %>% select(stageNum, year, all_of(userVar))
+        predVar <- predData %>% select(stageNum, year, all_of(userVar3))
         
         predVar
     })
@@ -413,10 +490,11 @@ shinyServer(function(input, output) {
     output$predTable <- renderTable({
         stage <- input$timeModelStage
         yearnum <- input$timeModelYear
+        userVar2 <- userVar2()
         
         predData <- finishTime %>% filter(stageNum == stage & year == yearnum)
         
-        prediction <- predict(model2(), newdata = predData)
+        prediction <- predict(model2()$model, newdata = predData)
         
         #Prediction table to show user
         
@@ -459,13 +537,14 @@ shinyServer(function(input, output) {
         
         #Do hierarchical clustering
         hierClust <- hclust(dist(clustData))
-        plot(hierClust)
+        hierClust
+        #plot(hierClust)
     })
     
     #Plot dendrogram
     
     output$clusterPlot <- renderPlot({
-        cluster()
+        plot(cluster())
     })
     
 })
