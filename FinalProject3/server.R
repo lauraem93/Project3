@@ -21,7 +21,6 @@ library(shinydashboard)
 library(ggplot2)
 library(rmarkdown)
 library(plotly)
-library(dendextend)
 
 # Read in data
 
@@ -47,8 +46,10 @@ shinyServer(function(input, output) {
         var <- input$stageCheckbox
         stageDataSub <- stageData
         
+        #Slider filters
         stageDataSub <- stageDataSub %>% filter(distance >= input$dataDistance[[1]] & distance <= input$dataDistance[[2]])
         
+        #Select and text input filters
         if (input$dataYear != "All"){
             stageDataSub <- stageDataSub %>% filter(year == input$dataYear)
         }
@@ -62,7 +63,7 @@ shinyServer(function(input, output) {
             stageDataSub <- stageDataSub %>% filter(arrival_city == input$dataArrival)
         }
         
-        
+        #Select variables
         stageDataSub <- stageDataSub %>% select(var)
     })
     
@@ -82,8 +83,10 @@ shinyServer(function(input, output) {
         var2 <- input$resultsCheckbox
         resultsDataSub <- results
         
+        #Slider filters
         resultsDataSub <- resultsDataSub %>% filter(result.sprint >= input$dataSprint[[1]] & result.sprint <= input$dataSprint[[2]]) %>% filter(result.climber >= input$dataClimber[1] & result.climber <= input$dataClimber[2]) %>% filter(result.time_ranking >= input$dataRanking[1] & result.time_ranking <= input$dataRanking[2])
         
+        #Select and text input filters
         if (input$dataCountry != ""){
             resultsDataSub <- resultsDataSub %>% filter(country_code == input$dataCountry)
         }
@@ -96,31 +99,8 @@ shinyServer(function(input, output) {
             resultsDataSub <- resultsDataSub %>% filter(stageId == input$dataStageNum)
         }
         
+        #Select variables
         resultsDataSub <- resultsDataSub %>% select(var2)
-    })
-    
-    resultsData1 <- reactive({
-        var2 <- input$resultsCheckbox
-        
-        #Filter data based on slider input
-        resultsDataSub <- results %>% filter(result.sprint > input$dataSprint[[1]] & result.sprint < input$dataSprint[[2]]) %>% filter(result.climber > input$dataClimber[1] & result.climber < input$dataClimber[2]) %>% filter(result.time_ranking > input$dataRanking[1] & result.time_ranking < input$dataRanking[2])
-        
-        #Filter the data based on input
-        if (input$dataName != ""){
-            resultsDataSub <- resultsDataSub %>% filter(name == input$dataName)
-        }
-        if (input$dataCountry != ""){
-            resultsDataSub <- resultsDataSub %>% filter(country_code == input$dataCountry)
-        }
-        
-        #Select columns base on input
-        resultsDataSub <- results[, var2, drop = FALSE]
-        
-        resultsDataSub
-    })
-    
-    output$resultsTable <- renderDataTable({
-        resultsData1()
     })
     
     #Download Results Data
@@ -135,10 +115,13 @@ shinyServer(function(input, output) {
     
     # Exploratory Data Analysis - Tables Page
     
+    #Most stage wins table
+    
     submitButton1 <- eventReactive(input$submit1, {
         value <- input$stageWins
         num <- input$printNum1
         
+        #Stage wins by cyclist or country, group by name or country, filter for only the winner, sum by name/country, arrange in descending order
         if (value == "Cyclist"){
             stageWinsTab <- results %>% group_by(name) %>% filter(result.time_ranking == 1) %>% summarise(totalWins = sum(result.time_ranking)) %>% arrange(desc(totalWins)) %>% head(num)
         } else {
@@ -147,13 +130,17 @@ shinyServer(function(input, output) {
         stageWinsTab
     })
     
+    #output stage wins table
     output$stageWinsTable <- renderDataTable({
         submitButton1()
     })
     
+    #Most points table
     submitButton2 <- eventReactive(input$submit2, {
         type <- input$pointsType
         class <- input$totalPoints
+        
+        #Create table for either most sprint or climber points. then by either cyclist or country. Same method for calculating points as used in stage wins table
         if (type == "Sprint"){
             if (class == "Cyclist"){
                 tab2 <- results %>% group_by(name) %>% summarise(totalPoints = sum(result.sprint)) %>% arrange(desc(totalPoints)) %>% head(input$printNum2)
@@ -171,6 +158,7 @@ shinyServer(function(input, output) {
         tab2
     })
     
+    #output most points table
     output$mostPointsTab <- renderDataTable({
         submitButton2()
     })
@@ -180,6 +168,8 @@ shinyServer(function(input, output) {
     submitButton5 <- eventReactive(input$submit5, {
         tableData <- stageData
         tableData$dist <- cut(tableData$distance, breaks = input$distSlider)
+        
+        #Create a contingency table. Split by year if selected
         if (input$byYear == TRUE){
             tab3 <- table(tableData$dist, tableData$classification, tableData$year)
         } else if (input$byYear == FALSE){
@@ -201,6 +191,7 @@ shinyServer(function(input, output) {
     hist1 <- reactive({
         g <- ggplot(data = stageData, aes(x = distance))
         
+        #Create histogram. Add a fill by variable if selected
         if (input$split == "No Split"){
             plot1 <- g + geom_histogram()
         } else if (input$split == "Classification"){
@@ -227,15 +218,13 @@ shinyServer(function(input, output) {
         contentType = "image/png"
     )
     
-    # Time by Distance Plot
+    # Time by Distance Plot - this plot has two options, interactive or non interactive
     
-    updateButton2 <- eventReactive(input$update2, {
-        type <- input$split2
-    })
-    
+    #non interactive plot - use ggplot
     pointplot <- reactive({
         g <- ggplot(finishTime, aes(x = distance, y = as.numeric(time)))
         
+        #determine if a group by variable was chosen and plot accordingly
         if (input$split2 == "No Split"){
             plot2 <- g + geom_point()
         } else if (input$split2 == "Classification"){
@@ -244,13 +233,97 @@ shinyServer(function(input, output) {
             plot2 <- g + geom_point(aes(colour = as.factor(year)))
         }
         
+        #add labels, title, legend title
         plot2 + labs(x = "Distance", y = "Time (min)", title = "Winner's Finish Time by Distance") + scale_colour_discrete(name = input$split2)
     })
     
-    output$plot2 <- renderPlot({
+    #output non interactive plot
+    output$staticplot <- renderPlot({
         print(pointplot())
     })
     
+    #Interactive plot using plotly
+    interactiveplot <- reactive({
+        
+        #determine if group by variable was selected. plot accordingly
+        if (input$split2 == "No Split"){
+            figure <- plot_ly(
+                type = 'scatter',
+                x = finishTime$distance,
+                y = as.numeric(finishTime$time),
+                
+                #what to display when use hovers over points
+                text = paste("<br>distance: ", finishTime$distance,
+                             "<br>time(min): ", round(finishTime$time, 2)),
+                hoverinfo = 'text',
+                mode = 'markers'
+            )
+        } else if (input$split2 == "Classification"){
+            figure <- plot_ly(
+                type = 'scatter',
+                x = finishTime$distance,
+                y = as.numeric(finishTime$time),
+                
+                #what to display when user hovers over points
+                text = paste("<br>distance: ", finishTime$distance,
+                             "<br>time(min): ", round(finishTime$time, 2),
+                             "<br>year: ", finishTime$year),
+                hoverinfo = 'text',
+                mode = 'markers',
+                
+                #add differrent colors for different years
+                transforms = list(
+                    list(
+                        type = 'groupby',
+                        groups = finishTime$year,
+                        styles = list(
+                            list(target = 2017, value = list(marker =list(color = 'blue'))),
+                            list(target = 2018, value = list(marker =list(color = 'green'))),
+                            list(target = 2019, value = list(marker =list(color = 'orange'))),
+                            list(target = 2020, value = list(marker =list(color = 'purple')))
+                        )
+                    )
+                )
+            ) %>% layout(showlegend = TRUE)
+        } else if (input$split2 == "Year"){
+            figure <- plot_ly(
+                type = 'scatter',
+                x = finishTime$distance,
+                y = as.numeric(finishTime$time),
+                
+                #what to display when user hovers over points
+                text = paste("<br>distance: ", finishTime$distance,
+                             "<br>time(min): ", round(finishTime$time, 2),
+                             "<br>classification: ", finishTime$classification),
+                hoverinfo = 'text',
+                mode = 'markers',
+                
+                #add different colors for different classifications
+                transforms = list(
+                    list(
+                        type = 'groupby',
+                        groups = finishTime$classification,
+                        styles = list(
+                            list(target = "Flat", value = list(marker =list(color = 'blue'))),
+                            list(target = "Medium Mountain", value = list(marker =list(color = 'green'))),
+                            list(target = "High Mountain", value = list(marker =list(color = 'orange'))),
+                            list(target = "Individual Time Trial", value = list(marker =list(color = 'purple'))),
+                            list(target = "Team Time Trial", value = list(marker =list(color = 'pink')))
+                        )
+                    )
+                )
+            ) %>% layout(showlegend = TRUE)
+        }
+        
+        figure
+    })
+    
+    #output interactive plot
+    output$plot2 <- renderPlotly({
+        interactiveplot()
+    })
+    
+    #save plot if non interactive plot was chosen
     output$savePlot <- downloadHandler(
         filename = "timebydistanceplot.png",
         content = function(file) {
@@ -308,7 +381,9 @@ shinyServer(function(input, output) {
         
         lm <- train(result.time_ranking ~ ., data = train1, method = "lm", trControl=trControl)
         
+        #the output of this reactiveEvent should be a list containing necessary objects for different outputs
         modelObjects <- list(lm = lm, stageModelData = stageModelData)
+        modelObjects
         
     })
     
@@ -318,7 +393,7 @@ shinyServer(function(input, output) {
         stagenum <- as.numeric(input$stageModelStage)
         predictorVar <- input$stageModelVar
         
-        lm <- model1()
+        lm <- model1()$lm
         
         #Join results and stage data
         modelData <- left_join(results, stageData, by = "stageId") %>% select(-result.time)
@@ -359,21 +434,19 @@ shinyServer(function(input, output) {
         pred
     })
     
-    #output$stageModelTable <- renderDataTable({
-    #    model1()
-    #})
-    
+    #fit statistics for the linear model
     output$stageModelSum <- renderPrint({
-        lm <- model1()
+        lm <- model1()$lm
         lm$results
     })
     
+    #fit statistics for the prediction
     output$stageModelPredSum <- renderPrint({
         yearnum <- as.numeric(input$stageModelYear)
         stagenum <- as.numeric(input$stageModelStage)
         predictorVar <- input$stageModelVar
         
-        lm <- model1()
+        lm <- model1()$lm
         
         #Join results and stage data
         modelData <- left_join(results, stageData, by = "stageId") %>% select(-result.time)
@@ -422,7 +495,6 @@ shinyServer(function(input, output) {
     model2 <- reactive({ 
         
         #User input predictor var
-        #userVar <- input$timeModelVar
         userVar <- userVar2()
         
         #Time needs to be numeric
@@ -454,6 +526,7 @@ shinyServer(function(input, output) {
         modelInfo
     })
     
+    #fit statistics for the model, predict on test data and get fit info
     output$timeStats <- renderPrint({
         timeTest <- model2()$timeTest
         
@@ -464,16 +537,7 @@ shinyServer(function(input, output) {
         
     })
     
-    #output$timeStats <- renderPrint({
-        
-        #Fit Statistics
-        
-    #    predModel <- predict(model2(), newdata = timeTest)
-    #    modelRes <- postResample(predModel, timeTest$numTime)
-        
-    #    modelRes
-        
-    #})
+    #Print a table that shows the predictor variables that were shown along with the stage and year for the prediction
     
     output$predVar <- renderTable({
         stage <- input$timeModelStage
@@ -487,6 +551,8 @@ shinyServer(function(input, output) {
         predVar
     })
     
+    #Table of the prediction and actual times
+    
     output$predTable <- renderTable({
         stage <- input$timeModelStage
         yearnum <- input$timeModelYear
@@ -494,13 +560,15 @@ shinyServer(function(input, output) {
         
         predData <- finishTime %>% filter(stageNum == stage & year == yearnum)
         
+        #Predict finish time
+        
         prediction <- predict(model2()$model, newdata = predData)
         
         #Prediction table to show user
         
         table <- cbind(predData, prediction)
         
-        predTable <- table %>% select(stageNum, year, prediction, result.time) %>% rename("actual" = result.time)
+        predTable <- table %>% select(stageNum, year, prediction, time) %>% rename("actual" = time)
         
         predTable
     })
@@ -509,10 +577,7 @@ shinyServer(function(input, output) {
     
     #Clusterint Title
     
-    clusterName <- eventReactive(input$submit6, {
-        
-    })
-    
+    #Change title depending on which data was selected
     output$clusterTitle <- renderUI({
         if (input$dataSelect == "Results") {
             title <- "Stage Results Hierarchical Cluster Dendrogram"
@@ -522,29 +587,37 @@ shinyServer(function(input, output) {
         h3(title)
     })
     
+    #Choose which variables to include in the clustering
+    
     cluster <- eventReactive(input$submit6, {
         #Choose correct data type and variables
         dataType <- input$dataSelect
-        if (dataType == "Stage Results"){
+        dataType
+    })
+    
+    #Do clustering and print a dendrogram
+    
+    output$clusterPlot <- renderPlot({
+        dataType <- cluster()
+        
+        #get data for clustering based on user input
+        if (dataType == "Results"){
             clusterVar <- input$clustStageVar
             clusterData <- left_join(results, stageData, by = "stageId") %>% select(all_of(clusterVar)) %>% na.omit()
-        } else if (dataType == "Winner's Time"){
+        } else if (dataType == "Time"){
             clusterVar <- input$clustTimeVar
-            clustData <- finishTime
-            clustData$time <- as.numeric(clustData$time)
-            clustData <- clustData %>% select(all_of(clusterVar))
+            clusterData <- finishTime
+            clusterData$time <- as.numeric(clusterData$time)
+            clusterData <- clusterData %>% select(all_of(clusterVar))
         }
         
         #Do hierarchical clustering
-        hierClust <- hclust(dist(clustData))
-        hierClust
-        #plot(hierClust)
-    })
-    
-    #Plot dendrogram
-    
-    output$clusterPlot <- renderPlot({
-        plot(cluster())
+        hierClust <- hclust(dist(clusterData))
+        #hierClust
+        dendrogram <- plot(hierClust)
+        dendrogram
     })
     
 })
+
+

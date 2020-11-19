@@ -371,9 +371,17 @@ summary {
 </div>
 <div id="packages-to-load" class="section level1">
 <h1>Packages to load</h1>
-<pre class="r"><code>libraries &lt;- c(&quot;tidyverse&quot;, &quot;readr&quot;, &quot;caret&quot;, &quot;DBI&quot;, &quot;lubridate&quot;, &quot;DT&quot;, &quot;knitr&quot;, &quot;shiny&quot;, &quot;shinydashboard&quot;, &quot;ggplot2&quot;, &quot;rmarkdown&quot;)
+<pre class="r"><code>#Install and load packages
 
-lapply(libraries, FUN = require, character.only = TRUE)</code></pre>
+packages &lt;- c(&quot;tidyverse&quot;, &quot;readr&quot;, &quot;caret&quot;, &quot;DBI&quot;, &quot;lubridate&quot;, &quot;DT&quot;, &quot;knitr&quot;, &quot;shiny&quot;, &quot;shinydashboard&quot;, &quot;ggplot2&quot;, &quot;rmarkdown&quot;, &quot;plotly&quot;, &quot;dendextend&quot;)
+
+# lapply(packages, FUN = install.packages)
+
+lapply(packages, FUN = require, character.only = TRUE)</code></pre>
+</div>
+<div id="run-the-shiny-app-from-github" class="section level1">
+<h1>Run the shiny app from github</h1>
+<pre class="r"><code># shiny::runGitHub(repo = &quot;lauraem93/Project3&quot;, ref = &quot;master&quot;, subdir = &quot;FinalProject3&quot;)</code></pre>
 </div>
 
 

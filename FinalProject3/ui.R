@@ -21,7 +21,6 @@ library(shinydashboard)
 library(ggplot2)
 library(rmarkdown)
 library(plotly)
-library(dendextend)
 
 # Read in data
 
@@ -291,6 +290,12 @@ dashboardPage(
                             ),
                             h3("Winner's Time by Distance"),
                             radioButtons(
+                                inputId = "interactive",
+                                label = "View Interactive Plot?",
+                                choices = c("Yes", "No"),
+                                selected = "No"
+                            ),
+                            radioButtons(
                                 inputId = "split2",
                                 label = "Split by Classification or Year",
                                 choices = c("No Split", "Classification", "Year"),
@@ -307,13 +312,23 @@ dashboardPage(
                                 label = "Save Histogram"
                             ),
                             h3("Winner's Time by Distance"),
-                            p("Below is a scatterplot of winner's time by distance. The data in the scatter plot can be grouped by either ", em("classification"), " or ", em("year."), " The plot can be saved using the download button below."),
-                            plotOutput("plot2"),
+                            p("Below is a scatterplot of winner's time by distance. The data in the scatter plot can be grouped by either ", em("classification"), " or ", em("year."), " An interactive plot can be viewed by choosing the appropriate option. If interactive is not selected, the plot can be saved using the download button below."),
+                            conditionalPanel(
+                                condition = "input.interactive == 'Yes'",
+                                plotlyOutput("plot2")
+                            ),
+                            conditionalPanel(
+                                condition = "input.interactive == 'No'",
+                                plotOutput("staticplot")
+                            ),
                             br(),
-                            downloadButton(
-                                outputId = "savePlot",
-                                label = "Save Plot"
-                            )
+                            conditionalPanel(
+                                condition = "input.interactive == 'No'",
+                                downloadButton(
+                                    outputId = "savePlot",
+                                    label = "Save Plot"
+                                )
+                            ),
                         )
                     )
                 )
@@ -392,7 +407,8 @@ dashboardPage(
                             h4("Selected Prediction Variable Values"),
                             tableOutput("predVar"),
                             h4("Prediction and Actual Times"),
-                            tableOutput("predTable"),
+                            p("Time is shown in minutes."),
+                            tableOutput("predTable")
                         )
                     ),
                 )
@@ -433,7 +449,8 @@ dashboardPage(
                         ),
                         mainPanel(
                             uiOutput("clusterTitle"),
-                            plotOutput("clusterPlot")
+                            p("Clustering is an unsupervised learning method. Hierarchical clustering is used to look at this data. In hierarchical clustering, all observations are in their own cluster and the closest/most related clusters are joined until all data is in one single cluster. The dendrogram produced is a visual of the clustering. Horizontal bars join clusters and vertical bars give an idea of how much change there is between clusters, ie more closely related clusters will have a shorter vertical distance between horizontal bars than distantly related clusters. Here, hierarchical clustering can be done for either winner's time data or stage results data. After choosing the data set to use, the variables to use in the clustering can be selected."),
+                            plotOutput("clusterPlot"),
                         )
                     )
                 )
