@@ -21,7 +21,6 @@ library(shinydashboard)
 library(ggplot2)
 library(rmarkdown)
 library(plotly)
-library(dendextend)
 
 # Read in data
 
