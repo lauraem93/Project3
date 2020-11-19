@@ -42,7 +42,7 @@ shinyServer(function(input, output) {
     
     # Data table page
     
-    output$redoStageData <- renderDataTable({
+    stageDataTable <- reactive({
         var <- input$stageCheckbox
         stageDataSub <- stageData
         
@@ -67,19 +67,24 @@ shinyServer(function(input, output) {
         stageDataSub <- stageDataSub %>% select(var)
     })
     
+    #output data table
+    output$redoStageData <- renderDataTable({
+        stageDataTable()
+    })
+    
     #Download Data Set
     
     output$saveStageData <- downloadHandler(
         filename = "stage-data.csv",
         content = function(file) {
-            write.csv(redoStageData(), file, row.names = FALSE)
+            write.csv(stageDataTable(), file, row.names = FALSE)
         },
         contentType = "text/csv"
     )
     
     #View Results Data
     
-    output$redoResultsData <- renderDataTable({
+    resultsDataTable2 <- reactive({
         var2 <- input$resultsCheckbox
         resultsDataSub <- results
         
@@ -103,12 +108,18 @@ shinyServer(function(input, output) {
         resultsDataSub <- resultsDataSub %>% select(var2)
     })
     
+    #output data table
+    
+    output$redoResultsData <- renderDataTable({
+        resultsDataTable2()
+    })
+    
     #Download Results Data
     
     output$saveResultsData <- downloadHandler(
         filename = "results.csv",
         content = function(file) {
-            write.csv(redoResultsData(), file, row.names = FALSE)
+            write.csv(resultsDataTable2(), file, row.names = FALSE)
         },
         contentType = "text/csv"
     )
