@@ -72,7 +72,7 @@ shinyServer(function(input, output) {
     output$saveStageData <- downloadHandler(
         filename = "stage-data.csv",
         content = function(file) {
-            write.csv(stageData1(), file, row.names = FALSE)
+            write.csv(redoStageData(), file, row.names = FALSE)
         },
         contentType = "text/csv"
     )
@@ -108,7 +108,7 @@ shinyServer(function(input, output) {
     output$saveResultsData <- downloadHandler(
         filename = "results.csv",
         content = function(file) {
-            write.csv(resultsData1(), file, row.names = FALSE)
+            write.csv(redoResultsData(), file, row.names = FALSE)
         },
         contentType = "text/csv"
     )

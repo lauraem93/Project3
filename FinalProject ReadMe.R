@@ -3,7 +3,7 @@
 #render("Project3-ReadMe.md", output_file = "README.md")
 
 #Install and load packages
-packages <- c("tidyverse", "readr", "caret", "DBI", "lubridate", "DT", "knitr", "shiny", "shinydashboard", "ggplot2", "rmarkdown", "plotly", "dendextend")
+packages <- c("tidyverse", "readr", "caret", "DBI", "lubridate", "DT", "knitr", "shiny", "shinydashboard", "ggplot2", "rmarkdown", "plotly")
 
 lapply(packages, FUN = install.packages)
 
